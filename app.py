@@ -8,7 +8,7 @@ import datetime
 
 engine = create_engine('sqlite:///user_data.db', echo=True)
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'
+app.secret_key = os.urandom(12)
 
 @app.route('/')
 def home():
