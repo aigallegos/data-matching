@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+    body {
+      font-family: "Lexend Deca", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+  </style>
+  <meta charset="UTF-8">
+  <title>Data Matching Tool</title>
+  <style>
+    .header-container {
+      display: flex;
+      align-items: center;
+    }
+    .header-title {
+      flex-grow: 1;
+    }
+
+    #linkButton {
+      margin-left: 30px;
+    }
+  </style>
+  
+</head>
+<body>
+  <div>
+    <h1>
+      Data Matching Tool
+    </h1>
+  </div>
+
+  <h2>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+      <input type="file" name="file">
+      <input type="submit" value="Query">
+    </form>
+  </h2>
+
+  <h3>
+    <a href='/logout'>Logout</a>
+  </h3>
+
+  <div class="header-container">
+    <h2>Matching Results</h2>
+    <button id="linkButton">Export</button>
+    <a id="linkAnchor" href="/export" style="display: none;"></a>
+  </div>
+    
+  <table>
+      <thead>
+          <tr>
+              {% for header in headers %}
+                  <th>{{ header }}</th>
+              {% endfor %}
+          </tr>
+      </thead>
+      <tbody>
+          {% for row in preview_rows %}
+              <tr>
+                  {% for cell in row %}
+                      <td>{{ cell }}</td>
+                  {% endfor %}
+              </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+  {% if matching_rows > 50 %}
+    <p>...and {{ matching_rows - 50 }} more truncated rows</p>
+  {% endif %}
+
+  <script>
+    // Get references to the button and anchor elements
+    var button = document.getElementById("linkButton");
+    var anchor = document.getElementById("linkAnchor");
+
+    // Add a click event listener to the button
+    button.addEventListener("click", function() {
+      // Simulate a click on the anchor tag
+      anchor.click();
+    });
+  </script>
+</body>
+</html>
+
+
+  
