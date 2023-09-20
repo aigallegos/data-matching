@@ -8,6 +8,7 @@ import datetime
 
 engine = create_engine('sqlite:///user_data.db', echo=True)
 app = Flask(__name__)
+app.secret_key = 'your_secret_key_here'
 
 @app.route('/')
 def home():
@@ -122,5 +123,4 @@ def logout():
   return redirect('/')
 
 if __name__ == "__main__":
-  app.secret_key = os.urandom(12)
   app.run(debug=True,host='0.0.0.0', port=4000)
