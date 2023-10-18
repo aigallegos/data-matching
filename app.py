@@ -7,11 +7,6 @@ import csv
 import tempfile
 import datetime
 
-import logging
-from azure.loganalytics import LogAnalyticsDataClient
-from azure.identity import DefaultAzureCredential
-from azure.loganalytics.models import LogItem
-
 engine = create_engine('sqlite:///user_data.db', echo=True)
 app = Flask(__name__)
 app.secret_key = os.urandom(12)
@@ -58,6 +53,13 @@ def do_login():
       session['admin'] = True
     else:
       session['admin'] = False
+
+    timestamp = datetime.datetime.now()
+    timestamp_str = str(timestamp).replace(' ', '_')[:-7]
+    log_entry = f"[LOGIN] User logged in at {timestamp_str}, Username: {session['user']}\n"
+    with open("query_log_file.txt", "a") as log_file:
+      log_file.write(log_entry)
+    
   else:
     flash('Incorrect Username or Password')
   return redirect('/')
@@ -119,9 +121,10 @@ def upload():
         
         timestamp = datetime.datetime.now()
         timestamp_str = str(timestamp).replace(' ', '_')[:-7]
-        log_entry = f"Query executed at {timestamp_str}, Records Uploaded: {len(data2) - 1}, Matches Found: {len(matching_rows)}, User: {session['user']}\n"
+        log_entry = f"[QUERY] Query executed at {timestamp_str}, Records Uploaded: {len(data2) - 1}, Matches Found: {len(matching_rows)}, User: {session['user']}\n"
         session["datetime"] = timestamp_str.replace(':', '-')
-        app.logger.info(log_entry)
+        with open("query_log_file.txt", "a") as log_file:
+          log_file.write(log_entry)
 
 
         if matching_rows:
@@ -182,6 +185,13 @@ def user_upload():
     else:
       sqlite_user_upload(new_username, new_password, 0, file_content)
     flash('User created successfully', 'success')
+
+    timestamp = datetime.datetime.now()
+    timestamp_str = str(timestamp).replace(' ', '_')[:-7]
+    log_entry = f"[ADMIN] User created at {timestamp_str}, New Username: {new_username}, Admin: {session['user']}\n"
+    with open("query_log_file.txt", "a") as log_file:
+      log_file.write(log_entry)
+
   return redirect('/')
 
 @app.route('/user_delete', methods=['POST'])
@@ -196,6 +206,12 @@ def user_delete():
         s.delete(user_to_delete)
         s.commit()
         flash(f'User {username} has been deleted', 'success')
+
+        timestamp = datetime.datetime.now()
+        timestamp_str = str(timestamp).replace(' ', '_')[:-7]
+        log_entry = f"[ADMIN] User deleted at {timestamp_str}, Username: {username}, Admin: {session['user']}\n"
+        with open("query_log_file.txt", "a") as log_file:
+          log_file.write(log_entry)
     else:
         flash(f'User {username} not found', 'error')
     
@@ -209,29 +225,20 @@ def logout():
   session["csv_temp_filename"] = None
   return redirect('/')
 
-def setup_logging():
-   # Initialize the log analytics data client
-   credential = DefaultAzureCredential()
-   client = LogAnalyticsDataClient(credential)
+@app.route('/download_log')
+def download_log_file():
+    log_file_path = "query_log_file.txt"
 
-   # Set the workspace ID and instrumentation key
-   workspace_id = os.environ.get('YOUR_WORKSPACE_ID')
-   instrumentation_key = os.environ.get('YOUR_INSTRUMENTATION_KEY')
+    timestamp = datetime.datetime.now()
+    timestamp_str = str(timestamp).replace(' ', '_')[:-7]
+    log_entry = f"[ADMIN] Log File downloaded at {timestamp_str}, Admin: {session['user']}\n"
+    with open("query_log_file.txt", "a") as log_file:
+      log_file.write(log_entry)
 
-   logger = logging.getLogger("azure")
-   logger.setLevel(logging.INFO)
+    filename = "Activity_Logs_" + timestamp_str.replace(':', '-') + ".txt"
 
-   # Define a custom log handler
-   class LogAnalyticsHandler(logging.Handler):
-       def emit(self, record):
-           message = self.format(record)
-           log_item = LogItem(message=message)
-           client.post_log(workspace_id, os.environ.get('YOUR_LOG_TYPE'), log_item)
-
-   log_handler = LogAnalyticsHandler()
-   logger.addHandler(log_handler)
+    return send_file(log_file_path, as_attachment=True, download_name=filename)
 
 if __name__ == "__main__":
-  setup_logging()
-
+  
   app.run(debug=True,host='0.0.0.0', port=4000)
