@@ -13,12 +13,25 @@
       display: flex;
       align-items: center;
     }
-    .header-title {
-      flex-grow: 1;
-    }
 
     #linkButton {
       margin-left: 30px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background-color: #f0f0f0;
+        text-align: left;
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+
+    th[colspan="2"] {
+        width: 20%;
     }
   </style>
   
@@ -30,16 +43,22 @@
     </h1>
   </div>
 
+  <div style="display: flex; margin-right: 20px;">
+    <div style="margin-right: 20px;">
+      <p>Hello, {{ login_user }}!</p>
+    </div>
+    <div>
+      <p><a href='/logout'>Logout</a></p>
+    </div>
+  </div>
+  
+
   <h2>
     <form action="/upload" method="POST" enctype="multipart/form-data">
       <input type="file" name="file">
       <input type="submit" value="Query">
     </form>
   </h2>
-
-  <h3>
-    <a href='/logout'>Logout</a>
-  </h3>
 
   <div class="header-container">
     <h2>Matching Results</h2>
@@ -51,7 +70,7 @@
       <thead>
           <tr>
               {% for header in headers %}
-                  <th>{{ header }}</th>
+                  <th colspan="2">{{ header }}</th>
               {% endfor %}
           </tr>
       </thead>
@@ -59,7 +78,7 @@
           {% for row in preview_rows %}
               <tr>
                   {% for cell in row %}
-                      <td>{{ cell }}</td>
+                      <td colspan="2">{{ cell }}</td>
                   {% endfor %}
               </tr>
           {% endfor %}
@@ -70,13 +89,10 @@
   {% endif %}
 
   <script>
-    // Get references to the button and anchor elements
     var button = document.getElementById("linkButton");
     var anchor = document.getElementById("linkAnchor");
 
-    // Add a click event listener to the button
     button.addEventListener("click", function() {
-      // Simulate a click on the anchor tag
       anchor.click();
     });
   </script>

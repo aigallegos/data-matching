@@ -20,5 +20,16 @@
   <input type="password" name="password" placeholder="Password">
   <input type="submit" value="Log in">
   </form>
+  <h4>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}
+            <span style="color: red;">{{ message }}</span>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+  </h4> 
 </body>
 </html>

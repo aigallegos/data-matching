@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+    body {
+      font-family: "Lexend Deca", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+  </style>
+  <meta charset="UTF-8">
+  <title>Data Matching Tool (ADMIN)</title>
+  <style>
+    .success {
+      color: green;
+    }
+    .flashes {
+      color: red;
+    }
+    .header-container {
+      display: flex;
+      align-items: center;
+    }
+
+    #linkButton {
+      margin-left: 30px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background-color: #f0f0f0;
+        text-align: left;
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+
+    th[colspan="2"] {
+        width: 15%;
+    }
+  </style>
+  
+</head>
+<body>
+  <div>
+    <h1>
+      Data Matching Tool (ADMIN)
+    </h1>
+  </div>
+
+  <div style="display: flex; margin-right: 20px;">
+    <div style="margin-right: 20px;">
+      <p>Hello, {{ login_user }}!</p>
+    </div>
+    <div>
+      <p><a href='/logout'>Logout</a></p>
+    </div>
+  </div>
+  
+
+  <h2>
+    Create New User:
+  </h2>
+  
+  <p>
+    <form method="POST" action="/user_upload" enctype="multipart/form-data">
+      <label for="myInput1">Enter new Username:</label>
+      <input type="text" id="myInput1" name="new_username" placeholder="New Username">
+      <br>
+      <label for="myInput2">Enter new Password:</label>
+      <input type="text" id="myInput2" name="new_password" placeholder="New Password">
+      <br>
+      <label for="yesNoRadio">Admin?</label>
+      <input type="radio" id="noRadio" name="yesNoRadio" value="False" checked onclick="toggleInputVisibility();">
+      <label for="noRadio">No</label>
+      <input type="radio" id="yesRadio" name="yesNoRadio" value="True" onclick="toggleInputVisibility();">
+      <label for="yesRadio">Yes</label>
+      <br>
+      <label for="fileInput" id="fileInputLabel" style="display: block;">Enter User Data:</label>
+      <input type="file" id="fileInput" name="new_file" placeholder="New CSV File" style="display: block;">
+      <br>
+      <input type="submit" value="Submit">
+    </form>
+  </p>
+  <h4>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}
+            {% if 'success' in message %}
+              <span class="success">{{ message }}</span>
+            {% else %}
+              <span>{{ message }}</span>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+  </h4> 
+
+
+  <div class="header-container">
+    <h2>Users</h2>
+  </div>
+    
+  <table>
+      <thead>
+          <tr>
+              <th colspan="2">User</th>
+              <th colspan="2">Password</th>
+              <th colspan="2">Admin</th>
+              <th colspan="2">Rows of Data</th>
+              <th colspan="2">Actions</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for user in users %}
+              <tr>
+                <td colspan="2">{{ user.username }}</td>
+                <td colspan="2">{{ user.password }}</td>
+                {% if user.is_admin == True %}
+                  <td colspan="2">YES</td>
+                {% endif %}
+                {% if user.is_admin == False %}
+                  <td colspan="2">NO</td>
+                {% endif %}
+                {% if user.is_admin == True %}
+                  <td colspan="2">N/A</td>
+                {% endif %}
+                {% if user.is_admin == False %}
+                  <td colspan="2">{{ user.num_rows_in_csv }}</td>
+                {% endif %}
+                {% if user.username != login_user %}
+                  <td>
+                    <form method="POST" action="/user_delete">
+                      <input type="hidden" name="username" value="{{ user.username }}">
+                      <input type="submit" value="Delete">
+                    </form>
+                  </td>
+                {% else %}
+                  <td>
+                    ** CURRENT USER **
+                  </td>
+                {% endif %}
+              </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+
+  <script>
+    var button = document.getElementById("linkButton");
+    var anchor = document.getElementById("linkAnchor");
+
+    button.addEventListener("click", function() {
+      anchor.click();
+    });
+  </script>
+  <script>
+    function toggleInputVisibility() {
+        var yesRadio = document.getElementById("yesRadio");
+        var myInput = document.getElementById("fileInput");
+        var myInputLabel = document.getElementById("fileInputLabel");
+
+        if (yesRadio.checked) {
+          myInputLabel.style.display = "none";
+          myInput.style.display = "none";
+        } else {
+          myInput.style.display = "block";
+          myInput.style.display = "block";
+        }
+    }
+  </script>
+</body>
+</html>
+
+
+  
